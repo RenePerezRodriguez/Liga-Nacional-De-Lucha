@@ -1,22 +1,26 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* LNL Brand Colors */
+  --lnl-red: #D32F2F;
+  --lnl-gold: #FFD700;
+  --lnl-dark: #121212;
+  --lnl-gray: #1E1E1E;
+  
+  /* Base Colors (Dark Theme Default) */
+  --background: var(--lnl-dark);
+  --foreground: #ededed;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-lnl-red: var(--lnl-red);
+  --color-lnl-gold: var(--lnl-gold);
+  --color-lnl-dark: var(--lnl-dark);
+  --color-lnl-gray: var(--lnl-gray);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
