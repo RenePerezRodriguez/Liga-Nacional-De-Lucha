@@ -1,4 +1,4 @@
-import { Calendar, Trophy, User } from "lucide-react";
+import { Calendar, Trophy, User, Camera } from "lucide-react";
 import Image from "next/image";
 
 const pastEvents = [
@@ -7,6 +7,7 @@ const pastEvents = [
         name: "Caos en la Jaula",
         date: "02 Dic, 2024",
         location: "Coliseo Pittsburg",
+        photos: ["/images/results/caos-1.jpg", "/images/results/caos-2.jpg", "/images/results/caos-3.jpg"],
         results: [
             { match: 1, winner: "Furia Roja", loser: "Titán", type: "Steel Cage Match por el Campeonato Peso Pesado", finish: "Pinfall tras Powerbomb desde la cima" },
             { match: 2, winner: "Águila Dorada", loser: "Cobra", type: "Mano a Mano", finish: "450 Splash" },
@@ -18,6 +19,7 @@ const pastEvents = [
         name: "Golpe de Estado",
         date: "15 Nov, 2024",
         location: "Coliseo de la Coronilla",
+        photos: ["/images/results/golpe-1.jpg", "/images/results/golpe-2.jpg"],
         results: [
             { match: 1, winner: "El Sombra", loser: "Rayo", type: "Lucha de Escaleras", finish: "Descolgó el maletín" },
             { match: 2, winner: "La Pantera", loser: "Víbora", type: "Campeonato Femenino", finish: "Submission" }
@@ -49,6 +51,27 @@ export default function ResultsPage() {
                             </div>
                             {/* Placeholder for event poster if available */}
                         </div>
+
+                        {/* Photo Gallery */}
+                        {event.photos && event.photos.length > 0 && (
+                            <div className="p-4 border-b border-zinc-800 bg-zinc-900/50">
+                                <h3 className="text-white font-bold uppercase tracking-widest text-xs mb-4 flex items-center gap-2">
+                                    <Camera className="w-4 h-4 text-lnl-red" /> Fotos del Evento
+                                </h3>
+                                <div className="grid grid-cols-3 gap-2">
+                                    {event.photos.map((photo, idx) => (
+                                        <div key={idx} className="relative aspect-video bg-zinc-800 rounded overflow-hidden group">
+                                            {/* Placeholder - uncomment when real images exist */}
+                                            {/* <Image src={photo} alt={`${event.name} foto ${idx + 1}`} fill className="object-cover group-hover:scale-105 transition-transform" /> */}
+                                            <div className="absolute inset-0 flex items-center justify-center text-zinc-600 text-xs font-bold uppercase">
+                                                Foto {idx + 1}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
                         <div className="p-6 space-y-6">
                             {event.results.map((match, idx) => (
                                 <div key={idx} className="flex flex-col md:flex-row gap-4 md:items-center border-b border-zinc-900 last:border-0 pb-6 last:pb-0">
@@ -75,3 +98,4 @@ export default function ResultsPage() {
         </div>
     );
 }
+

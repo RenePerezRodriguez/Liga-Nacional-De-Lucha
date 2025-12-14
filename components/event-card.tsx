@@ -66,7 +66,7 @@ export function EventCard({
                 </div>
 
                 <Link
-                    href="/eventos"
+                    href="/reservas"
                     className="inline-flex items-center justify-center bg-lnl-red text-white font-bold uppercase tracking-wider py-2 px-6 rounded hover:bg-red-700 transition-colors"
                 >
                     Entradas

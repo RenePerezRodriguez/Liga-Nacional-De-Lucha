@@ -7,14 +7,13 @@ import { Countdown } from "@/components/countdown";
 import { ChampionshipsSection } from "@/components/championships";
 import { YouTubeFeed } from "@/components/youtube-feed";
 import { Newsletter } from "@/components/newsletter";
-import { SponsorsSection } from "@/components/sponsors";
 import Image from "next/image";
 
 export default function Home() {
   return (
-    <div className="flex flex-col gap-12 md:gap-20 pb-12 md:pb-20">
+    <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative min-h-[90vh] flex flex-col items-center justify-center overflow-hidden pt-20 pb-10">
+      <section className="relative min-h-screen flex flex-col pt-16 md:pt-20 pb-44 md:pb-32 overflow-hidden">
         {/* Hero Background Video */}
         <div className="absolute inset-0 z-0">
           <video
@@ -32,41 +31,56 @@ export default function Home() {
               className="object-cover"
             />
           </video>
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/40 to-black" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-black/60" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-transparent to-black/80" />
         </div>
 
-        <div className="relative z-10 text-center px-4 w-full max-w-4xl mx-auto flex-grow flex flex-col justify-center">
-          <div className="mb-4 inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-full bg-lnl-gold/10 border border-lnl-gold/20 text-lnl-gold font-bold uppercase tracking-widest text-[10px] md:text-sm animate-fade-in-up mx-auto">
-            <Trophy className="w-3 h-3 md:w-4 md:h-4" />
-            <span>La Liga #1 de Bolivia</span>
-          </div>
-          <h1 className="text-3xl sm:text-5xl md:text-7xl font-black text-white uppercase italic tracking-tighter mb-4 leading-none text-shadow-lg break-words">
-            Pasión. <span className="text-lnl-red text-shadow-glow">Adrenalina.</span> <br />
-            Lucha Libre.
-          </h1>
-          <p className="text-sm sm:text-lg md:text-2xl text-gray-300 mb-6 md:mb-10 max-w-2xl mx-auto px-2 drop-shadow-md">
-            El mejor espectáculo de Cochabamba.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center px-4 w-full sm:w-auto">
-            <Link
-              href="/eventos"
-              className="w-full sm:w-auto px-6 py-3 bg-lnl-red text-white font-bold uppercase tracking-wider rounded hover:bg-red-700 transition-colors shadow-lg text-xs sm:text-base flex items-center justify-center"
-            >
-              Próximos Eventos
-            </Link>
-            <Link
-              href="/luchadores"
-              className="w-full sm:w-auto px-6 py-3 bg-transparent border-2 border-white text-white font-bold uppercase tracking-wider rounded hover:bg-white hover:text-black transition-colors text-xs sm:text-base flex items-center justify-center"
-            >
-              Ver Roster
-            </Link>
+        {/* Content Wrapper */}
+        <div className="relative z-10 w-full max-w-7xl mx-auto flex-grow flex flex-col justify-center px-4 sm:px-6 lg:px-8">
+
+          {/* Main Title Area (Centered) */}
+          <div className="flex flex-col justify-center items-center text-center">
+            <div className="mb-4 md:mb-6 inline-flex items-center justify-center gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full bg-lnl-gold/10 border border-lnl-gold/20 text-lnl-gold font-bold uppercase tracking-widest text-[10px] md:text-sm animate-fade-in-up backdrop-blur-md">
+              <Trophy className="w-3 h-3 md:w-4 md:h-4" />
+              <span>La Liga #1 de Bolivia</span>
+            </div>
+
+            <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-black text-white uppercase italic tracking-tighter mb-4 md:mb-6 leading-[0.9] text-shadow-lg break-words max-w-5xl">
+              Guerra del <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-b from-lnl-red to-red-900 filter drop-shadow-[0_2px_10px_rgba(220,38,38,0.5)]">Valle</span>
+            </h1>
+
+            <p className="text-base sm:text-xl md:text-2xl lg:text-3xl text-gray-200 font-medium mb-6 md:mb-8 max-w-2xl drop-shadow-md tracking-tight px-4">
+              El evento más explosivo del año llega a Bolivia.
+            </p>
           </div>
         </div>
 
-        {/* Countdown */}
-        <div className="relative z-20 w-full mb-8 px-4 flex justify-center">
-          <Countdown targetDate="2024-12-15T18:30:00" eventName="Guerra del Valle: Invasión" />
+        {/* Bottom Banner - FULL WIDTH at absolute bottom */}
+        <div className="absolute bottom-0 left-0 right-0 z-20 w-full bg-zinc-900/95 backdrop-blur-xl border-t-4 border-lnl-red p-3 md:p-6 shadow-2xl">
+          <div className="max-w-7xl mx-auto flex flex-col items-center gap-4 md:flex-row md:justify-between md:gap-12">
+
+            {/* Event Info */}
+            <div className="text-center md:text-left">
+              <h3 className="text-xl md:text-2xl font-black text-white uppercase italic tracking-tighter">15 de Diciembre</h3>
+              <p className="text-gray-400 text-xs md:text-base font-medium uppercase tracking-widest">Coliseo Pittsburg • 18:30</p>
+            </div>
+
+            {/* Countdown - Hidden on very small screens */}
+            <div className="hidden sm:flex flex-grow justify-center scale-75 md:scale-100 origin-center">
+              <Countdown targetDate="2024-12-15T18:30:00" eventName="" />
+            </div>
+
+            {/* CTA Button */}
+            <a
+              href="https://wa.me/59170000000?text=Hola,%20quiero%20comprar%20entradas%20para%20Guerra%20del%20Valle"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="whitespace-nowrap px-6 md:px-8 py-3 md:py-4 bg-lnl-red text-white font-black uppercase tracking-widest rounded text-sm md:text-lg shadow-[0_0_20px_rgba(220,38,38,0.4)] hover:shadow-[0_0_30px_rgba(220,38,38,0.6)] hover:bg-red-600 transition-all flex items-center gap-2"
+            >
+              Comprar Entrada <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
+            </a>
+          </div>
         </div>
       </section>
 
@@ -74,7 +88,7 @@ export default function Home() {
       <ChampionshipsSection />
 
       {/* Upcoming Events */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full mt-12 md:mt-20">
         <div className="flex items-end justify-between mb-10">
           <div>
             <span className="text-lnl-red font-bold uppercase tracking-widest text-sm block mb-2">Calendario</span>
@@ -110,7 +124,7 @@ export default function Home() {
       </section>
 
       {/* Roster Preview */}
-      <section className="bg-lnl-gray py-10 md:py-20 border-y border-zinc-800">
+      <section className="bg-lnl-gray py-10 md:py-20 border-y border-zinc-800 mt-12 md:mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-end justify-between mb-10">
             <div>
@@ -123,16 +137,16 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
-            <WrestlerCard name="El Sombra" nickname="El Rey de las Tinieblas" imageUrl="/images/roster/el-sombra.png" />
-            <WrestlerCard name="Furia Roja" nickname="La Máquina de Dolor" alignment="heel" imageUrl="/images/roster/furia-roja.png" />
-            <WrestlerCard name="Águila Dorada" nickname="El Vuelo de la Victoria" imageUrl="/images/roster/aguila-dorada.png" />
-            <WrestlerCard name="Titán" nickname="El Gigante de los Andes" imageUrl="/images/roster/titan.png" />
+            <WrestlerCard name="Alberto Del Rio" nickname="El Patrón" alignment="heel" imageUrl="/images/roster/sin-fondo/ALBERTO DEL RIO.png" />
+            <WrestlerCard name="Ajayu" nickname="El Espíritu Andino" imageUrl="/images/roster/sin-fondo/AJAYU.png" />
+            <WrestlerCard name="Hijo de Dos Caras" nickname="Legado de Leyenda" imageUrl="/images/roster/sin-fondo/HIJO DE DOS CARAS.png" />
+            <WrestlerCard name="Sarah" nickname="La Diva del Ring" imageUrl="/images/roster/sin-fondo/SARAH.png" />
           </div>
         </div>
       </section>
 
       {/* Latest News */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full mt-12 md:mt-20">
         <h2 className="text-4xl font-black uppercase italic tracking-tight text-white mb-10">Últimas Noticias</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <NewsCard
@@ -155,13 +169,12 @@ export default function Home() {
       </section>
 
       {/* YouTube Feed */}
-      <YouTubeFeed />
+      <div id="multimedia" className="scroll-mt-24 mt-12 md:mt-20">
+        <YouTubeFeed />
+      </div>
 
       {/* Newsletter */}
       <Newsletter />
-
-      {/* Sponsors */}
-      <SponsorsSection />
 
     </div>
   );

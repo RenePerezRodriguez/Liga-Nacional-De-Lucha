@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
 
 interface WrestlerCardProps {
     name: string;
@@ -9,9 +8,17 @@ interface WrestlerCardProps {
     alignment?: "face" | "heel";
 }
 
-export function WrestlerCard({ name, nickname, imageUrl, alignment = "face" }: WrestlerCardProps) {
+export function WrestlerCard({ name, nickname, imageUrl }: WrestlerCardProps) {
+    // Generate clean slug: remove accents, special chars, convert spaces to hyphens
+    const slug = name
+        .toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Remove accents
+        .replace(/[^a-z0-9\s-]/g, "") // Remove special chars except spaces and hyphens
+        .replace(/\s+/g, '-') // Replace spaces with hyphens
+        .replace(/-+/g, '-'); // Replace multiple hyphens with single
+
     return (
-        <Link href={`/luchadores/${name.toLowerCase().replace(/\s+/g, '-')}`} className="group relative block aspect-[3/4] overflow-hidden rounded-xl bg-lnl-gray">
+        <Link href={`/luchadores/${slug}`} className="group relative block aspect-[3/4] overflow-hidden rounded-xl bg-lnl-gray">
             {/* Background/Image */}
             <div className="absolute inset-0 bg-zinc-900 transition-transform duration-500 group-hover:scale-105">
                 {imageUrl ? (

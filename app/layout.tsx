@@ -3,7 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
-import { WhatsAppButton } from "@/components/whatsapp-btn";
+import { SponsorsSection } from "@/components/sponsors";
+import { SocialFab } from "@/components/social-fab";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,8 +17,30 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Liga Nacional de Lucha | Cochabamba",
-  description: "El sitio oficial de la Liga Nacional de Lucha de Cochabamba. Eventos, noticias y el mejor wrestling de Bolivia.",
+  title: {
+    default: "Liga Nacional de Lucha | Bolivia",
+    template: "%s | LNL Bolivia"
+  },
+  description: "El sitio oficial de la Liga Nacional de Lucha de Bolivia. Eventos, noticias y el mejor wrestling del país. La Paz, Santa Cruz, Cochabamba.",
+  keywords: ["lucha libre", "wrestling", "Bolivia", "LNL", "eventos", "luchadores", "Cochabamba", "La Paz", "Santa Cruz"],
+  authors: [{ name: "Liga Nacional de Lucha Bolivia" }],
+  creator: "Liga Nacional de Lucha Bolivia",
+  metadataBase: new URL("https://luchalibrebolivia.com"),
+  openGraph: {
+    type: "website",
+    locale: "es_BO",
+    siteName: "Liga Nacional de Lucha Bolivia",
+    title: "Liga Nacional de Lucha | Bolivia",
+    description: "El sitio oficial de la Liga Nacional de Lucha de Bolivia. Eventos, noticias y el mejor wrestling del país.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Liga Nacional de Lucha | Bolivia",
+    description: "El sitio oficial de la Liga Nacional de Lucha de Bolivia.",
+  },
+  manifest: "/manifest.json",
+  themeColor: "#DC2626",
+  viewport: "width=device-width, initial-scale=1",
 };
 
 export default function RootLayout({
@@ -31,11 +54,12 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white min-h-screen flex flex-col`}
       >
         <Navbar />
-        <main className="flex-grow pt-20">
+        <main className="flex-grow pt-28">
           {children}
         </main>
+        <SponsorsSection />
         <Footer />
-        <WhatsAppButton />
+        <SocialFab />
       </body>
     </html>
   );
