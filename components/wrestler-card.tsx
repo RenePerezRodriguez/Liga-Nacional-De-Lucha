@@ -6,16 +6,17 @@ interface WrestlerCardProps {
     nickname?: string;
     imageUrl?: string;
     alignment?: "face" | "heel";
+    slug?: string;
 }
 
-export function WrestlerCard({ name, nickname, imageUrl }: WrestlerCardProps) {
-    // Generate clean slug: remove accents, special chars, convert spaces to hyphens
-    const slug = name
+export function WrestlerCard({ name, nickname, imageUrl, slug: providedSlug }: WrestlerCardProps) {
+    // Use provided slug or generate from name
+    const slug = providedSlug || name
         .toLowerCase()
-        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Remove accents
-        .replace(/[^a-z0-9\s-]/g, "") // Remove special chars except spaces and hyphens
-        .replace(/\s+/g, '-') // Replace spaces with hyphens
-        .replace(/-+/g, '-'); // Replace multiple hyphens with single
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-');
 
     return (
         <Link href={`/luchadores/${slug}`} className="group relative block aspect-[3/4] overflow-hidden rounded-xl bg-lnl-gray">
@@ -26,6 +27,7 @@ export function WrestlerCard({ name, nickname, imageUrl }: WrestlerCardProps) {
                         src={imageUrl}
                         alt={name}
                         fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         className="object-cover object-top"
                     />
                 ) : (

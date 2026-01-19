@@ -3,13 +3,14 @@
 import { CheckCircle, Zap } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { useSiteConfig } from "@/components/config-provider";
 
 export default function AcademyPage() {
+    const config = useSiteConfig();
+
     const handleWhatsAppJoin = (e: React.FormEvent) => {
         e.preventDefault();
-        // In a real app, you'd gather the form data here.
-        // For now, we'll just open the chat.
-        window.open("https://wa.me/59176900000?text=Hola,%20quiero%20inscribirme%20a%20la%20academia%20LNL", "_blank");
+        window.open(`https://wa.me/${config.whatsappAcademia}?text=Hola,%20quiero%20inscribirme%20a%20la%20academia%20LNL`, "_blank");
     };
 
     return (

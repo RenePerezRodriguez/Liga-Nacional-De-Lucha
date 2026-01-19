@@ -1,6 +1,33 @@
 import { NewsCard } from "@/components/news-card";
+import { collection, getDocs, query, orderBy, DocumentData } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { Newspaper } from "lucide-react";
 
-export default function NewsPage() {
+interface NewsItem extends DocumentData {
+    id: string;
+    title: string;
+    date: string;
+    category?: string;
+    description?: string;
+    image?: string;
+    slug?: string;
+}
+
+async function getNews() {
+    const newsQuery = query(
+        collection(db, "noticias"),
+        orderBy("date", "desc")
+    );
+    const snap = await getDocs(newsQuery);
+    return snap.docs.map(doc => ({ id: doc.id, ...doc.data() })) as NewsItem[];
+}
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+export default async function NewsPage() {
+    const news = await getNews();
+
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
             <div className="mb-8 md:mb-12">
@@ -12,38 +39,27 @@ export default function NewsPage() {
                 </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <NewsCard
-                    title="Resultados: Caos en la Jaula - Diciembre 2024"
-                    excerpt="Una noche llena de sorpresas donde el campeonato máximo cambió de manos en una lucha sangrienta dentro de la jaula de acero."
-                    date="02 Dic, 2024"
-                    category="Resultados"
-                    slug="resultados-caos-jaula"
-                    imageUrl="/images/news/steel-cage.png"
-                />
-                <NewsCard
-                    title="Gran Apertura de la Academia LNL 2025"
-                    excerpt="La Liga Nacional de Lucha abre sus puertas para la nueva generación de talentos. ¡Inscríbete hoy y conviértete en una leyenda!"
-                    date="28 Nov, 2024"
-                    category="Anuncio"
-                    slug="apertura-academia-2025"
-                    imageUrl="/images/news/wrestling-school.png"
-                />
-                <NewsCard
-                    title="Entrevista Exclusiva: El Sombra rompe el silencio"
-                    excerpt="El enigmático luchador habla por primera vez sobre su traición a Furia Roja y sus planes dominantes para el próximo año."
-                    date="25 Nov, 2024"
-                    category="Entrevista"
-                    slug="entrevista-sombra"
-                />
-                <NewsCard
-                    title="Nueva alianza: LNL x Gimnasio Hércules"
-                    excerpt="Anunciamos nuestra nueva sede de entrenamiento oficial. Mejores instalaciones para preparar a las futuras estrellas."
-                    date="20 Nov, 2024"
-                    category="Corporativo"
-                    slug="alianza-gimnasio-hercules"
-                />
-            </div>
+            {news.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {news.map((item) => (
+                        <NewsCard
+                            key={item.id}
+                            title={item.title}
+                            excerpt={item.description || item.title}
+                            date={item.date}
+                            category={item.category}
+                            slug={item.slug || item.id}
+                            imageUrl={item.image}
+                        />
+                    ))}
+                </div>
+            ) : (
+                <div className="text-center py-20">
+                    <Newspaper className="w-16 h-16 text-zinc-700 mx-auto mb-4" />
+                    <p className="text-gray-500 text-lg">No hay noticias publicadas.</p>
+                    <p className="text-gray-600 text-sm mt-2">Vuelve pronto para las últimas novedades.</p>
+                </div>
+            )}
         </div>
     );
 }

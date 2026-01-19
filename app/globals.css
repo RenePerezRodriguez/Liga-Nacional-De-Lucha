@@ -1,12 +1,14 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 :root {
   /* LNL Brand Colors */
   --lnl-red: #D32F2F;
-  --lnl-gold: #C0C0C0; /* Changed from Gold (#FFD700) to Silver */
+  --lnl-gold: #C0C0C0;
+  /* Changed from Gold (#FFD700) to Silver */
   --lnl-dark: #121212;
   --lnl-gray: #1E1E1E;
-  
+
   /* Base Colors (Dark Theme Default) */
   --background: var(--lnl-dark);
   --foreground: #ededed;

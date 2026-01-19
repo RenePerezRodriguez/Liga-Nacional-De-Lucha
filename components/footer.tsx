@@ -1,56 +1,150 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Facebook, Youtube, Ticket, Calendar, MapPin, ArrowRight } from "lucide-react";
-import { Countdown } from "./countdown";
+import { Facebook, Youtube, Ticket, Calendar, MapPin, ArrowRight, Clock } from "lucide-react";
+import { collection, query, where, orderBy, limit, onSnapshot, Timestamp, DocumentData } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { useSiteConfig } from "@/components/config-provider";
+
+interface NextEvent extends DocumentData {
+    id: string;
+    title: string;
+    date: Timestamp | Date;
+    location?: string;
+    image?: string;
+    ticketLink?: string;
+}
+
+// Countdown Timer Component (inline)
+function CountdownTimer({ targetDate }: { targetDate: Date }) {
+    const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+
+    useEffect(() => {
+        const calculateTimeLeft = () => {
+            const difference = +targetDate - +new Date();
+            if (difference > 0) {
+                setTimeLeft({
+                    days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+                    hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+                    minutes: Math.floor((difference / 1000 / 60) % 60),
+                    seconds: Math.floor((difference / 1000) % 60),
+                });
+            }
+        };
+        const timer = setInterval(calculateTimeLeft, 1000);
+        calculateTimeLeft();
+        return () => clearInterval(timer);
+    }, [targetDate]);
+
+    return (
+        <div className="flex items-center gap-2 text-white">
+            <Clock className="w-4 h-4 text-white/70" />
+            <span className="text-xs uppercase tracking-widest text-white/70">Próximo Evento:</span>
+            <div className="flex gap-1 font-mono text-lg font-black">
+                <span>{timeLeft.days.toString().padStart(2, '0')}</span>
+                <span className="text-white/50">:</span>
+                <span>{timeLeft.hours.toString().padStart(2, '0')}</span>
+                <span className="text-white/50">:</span>
+                <span>{timeLeft.minutes.toString().padStart(2, '0')}</span>
+                <span className="text-white/50">:</span>
+                <span>{timeLeft.seconds.toString().padStart(2, '0')}</span>
+            </div>
+        </div>
+    );
+}
 
 export function Footer() {
+    const [nextEvent, setNextEvent] = useState<NextEvent | null>(null);
+    const [loading, setLoading] = useState(true);
+    const config = useSiteConfig();
+
+    useEffect(() => {
+        // Fetch the next upcoming event (date >= now)
+        const now = new Date();
+        const q = query(
+            collection(db, "eventos"),
+            where("date", ">=", Timestamp.fromDate(now)),
+            orderBy("date", "asc"),
+            limit(1)
+        );
+
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            if (!snapshot.empty) {
+                const doc = snapshot.docs[0];
+                setNextEvent({ id: doc.id, ...doc.data() } as NextEvent);
+            } else {
+                setNextEvent(null);
+            }
+            setLoading(false);
+        });
+
+        return () => unsubscribe();
+    }, []);
+
+    // Convert Firebase Timestamp to Date
+    const eventDate = nextEvent?.date instanceof Timestamp
+        ? nextEvent.date.toDate()
+        : nextEvent?.date instanceof Date
+            ? nextEvent.date
+            : null;
+
     return (
         <footer className="bg-lnl-dark border-t border-lnl-gray">
 
-            {/* Next Event Banner */}
-            <div className="bg-gradient-to-r from-lnl-red via-red-700 to-lnl-red relative overflow-hidden">
-                <div className="absolute inset-0 bg-[url('/images/events/guerra-del-valle.png')] bg-cover bg-center opacity-20" />
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10">
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            {/* Next Event Banner - Only show if there's an upcoming event */}
+            {!loading && nextEvent && eventDate && (
+                <div className="bg-gradient-to-r from-lnl-red via-red-700 to-lnl-red relative overflow-hidden">
+                    {nextEvent.image && (
+                        <div
+                            className="absolute inset-0 bg-cover bg-center opacity-20"
+                            style={{ backgroundImage: `url(${nextEvent.image})` }}
+                        />
+                    )}
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10">
+                        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
 
-                        {/* Event Info */}
-                        <div className="flex items-center gap-4 text-white">
-                            <div className="hidden sm:block p-3 bg-black/30 rounded-lg">
-                                <Calendar className="w-8 h-8" />
-                            </div>
-                            <div className="text-center md:text-left">
-                                <span className="text-xs font-bold uppercase tracking-widest text-white/70">Próximo Evento</span>
-                                <h3 className="text-xl md:text-2xl font-black uppercase italic tracking-tight">Guerra del Valle</h3>
-                                <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 text-sm text-white/80">
-                                    <span className="flex items-center gap-1">
-                                        <Calendar className="w-4 h-4" /> 15 Dic, 2024
-                                    </span>
-                                    <span className="flex items-center gap-1">
-                                        <MapPin className="w-4 h-4" /> Coliseo Pittsburg
-                                    </span>
+                            {/* Event Info */}
+                            <div className="flex items-center gap-4 text-white">
+                                <div className="hidden sm:block p-3 bg-black/30 rounded-lg">
+                                    <Calendar className="w-8 h-8" />
+                                </div>
+                                <div className="text-center md:text-left">
+                                    <span className="text-xs font-bold uppercase tracking-widest text-white/70">Próximo Evento</span>
+                                    <h3 className="text-xl md:text-2xl font-black uppercase italic tracking-tight">{nextEvent.title}</h3>
+                                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 text-sm text-white/80">
+                                        <span className="flex items-center gap-1">
+                                            <Calendar className="w-4 h-4" />
+                                            {eventDate.toLocaleDateString('es-BO', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                        </span>
+                                        {nextEvent.location && (
+                                            <span className="flex items-center gap-1">
+                                                <MapPin className="w-4 h-4" /> {nextEvent.location}
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        {/* Countdown */}
-                        <div className="hidden lg:block scale-75 origin-center">
-                            <Countdown targetDate="2024-12-15T18:30:00" eventName="" />
-                        </div>
+                            {/* Countdown */}
+                            <div className="hidden lg:block">
+                                <CountdownTimer targetDate={eventDate} />
+                            </div>
 
-                        {/* CTA */}
-                        <Link
-                            href="/reservas"
-                            className="flex items-center gap-2 px-6 py-3 bg-white text-lnl-red font-black uppercase tracking-widest rounded-lg hover:bg-yellow-400 hover:text-black transition-all shadow-lg group"
-                        >
-                            <Ticket className="w-5 h-5" />
-                            Comprar Entradas
-                            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                        </Link>
+                            {/* CTA */}
+                            <Link
+                                href={nextEvent.ticketLink || "/reservas"}
+                                className="flex items-center gap-2 px-6 py-3 bg-white text-lnl-red font-black uppercase tracking-widest rounded-lg hover:bg-yellow-400 hover:text-black transition-all shadow-lg group"
+                            >
+                                <Ticket className="w-5 h-5" />
+                                Comprar Entradas
+                                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                            </Link>
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
 
             {/* Main Footer */}
             <div className="pt-12 pb-8">
@@ -84,17 +178,23 @@ export function Footer() {
 
                             {/* Social Icons */}
                             <div className="flex space-x-3">
-                                <a href="https://www.facebook.com/profile.php?id=61559310413691" target="_blank" rel="noopener noreferrer" className="p-2 bg-zinc-800 rounded-lg text-gray-400 hover:bg-blue-600 hover:text-white transition-all">
-                                    <Facebook className="h-5 w-5" />
-                                </a>
-                                <a href="https://www.youtube.com/@LigaNacionalDeLucha" target="_blank" rel="noopener noreferrer" className="p-2 bg-zinc-800 rounded-lg text-gray-400 hover:bg-red-600 hover:text-white transition-all">
-                                    <Youtube className="h-5 w-5" />
-                                </a>
-                                <a href="https://www.tiktok.com/@liganacionalde.lucha" target="_blank" rel="noopener noreferrer" className="p-2 bg-zinc-800 rounded-lg text-gray-400 hover:bg-pink-600 hover:text-white transition-all">
-                                    <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
-                                        <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z" />
-                                    </svg>
-                                </a>
+                                {config.social.facebook && (
+                                    <a href={config.social.facebook} target="_blank" rel="noopener noreferrer" className="p-2 bg-zinc-800 rounded-lg text-gray-400 hover:bg-blue-600 hover:text-white transition-all">
+                                        <Facebook className="h-5 w-5" />
+                                    </a>
+                                )}
+                                {config.social.youtube && (
+                                    <a href={config.social.youtube} target="_blank" rel="noopener noreferrer" className="p-2 bg-zinc-800 rounded-lg text-gray-400 hover:bg-red-600 hover:text-white transition-all">
+                                        <Youtube className="h-5 w-5" />
+                                    </a>
+                                )}
+                                {config.social.tiktok && (
+                                    <a href={config.social.tiktok} target="_blank" rel="noopener noreferrer" className="p-2 bg-zinc-800 rounded-lg text-gray-400 hover:bg-pink-600 hover:text-white transition-all">
+                                        <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
+                                            <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z" />
+                                        </svg>
+                                    </a>
+                                )}
                             </div>
                         </div>
 
@@ -124,8 +224,8 @@ export function Footer() {
                                     Cochabamba, Bolivia
                                 </li>
                                 <li>
-                                    <a href="tel:+59170000000" className="hover:text-white transition-colors">
-                                        +591 700-00000
+                                    <a href={`tel:+${config.whatsappVentas}`} className="hover:text-white transition-colors">
+                                        +{config.whatsappVentas.slice(0, 3)} {config.whatsappVentas.slice(3, 6)}-{config.whatsappVentas.slice(6)}
                                     </a>
                                 </li>
                                 <li>

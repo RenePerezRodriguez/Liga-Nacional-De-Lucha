@@ -19,7 +19,7 @@ interface TaleOfTheTapeProps {
 export function TaleOfTheTape({ fighter1, fighter2 }: TaleOfTheTapeProps) {
     return (
         <div className="w-full bg-zinc-900 border-y-4 border-lnl-gold py-8 overflow-hidden relative">
-            <div className="absolute inset-0 bg-[url('/images/grid-texture.png')] opacity-10"></div>
+            <div className="absolute inset-0 bg-[radial-gradient(circle,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[length:20px_20px] opacity-30"></div>
 
             <div className="max-w-6xl mx-auto px-4 relative z-10">
                 <h3 className="text-center text-4xl md:text-5xl font-black text-white uppercase italic tracking-tighter mb-8 text-shadow-glow">
@@ -31,7 +31,7 @@ export function TaleOfTheTape({ fighter1, fighter2 }: TaleOfTheTapeProps) {
                     <div className="text-center md:text-right order-2 md:order-1">
                         <div className="relative w-48 h-48 mx-auto md:ml-auto md:mr-0 mb-4 rounded-full border-4 border-lnl-red overflow-hidden bg-zinc-800">
                             {fighter1.image ? (
-                                <Image src={fighter1.image} alt={fighter1.name} fill className="object-cover" />
+                                <Image src={fighter1.image} alt={fighter1.name} fill sizes="192px" className="object-cover" />
                             ) : (
                                 <div className="w-full h-full bg-zinc-700 animate-pulse" />
                             )}
@@ -51,7 +51,7 @@ export function TaleOfTheTape({ fighter1, fighter2 }: TaleOfTheTapeProps) {
                     <div className="text-center md:text-left order-3">
                         <div className="relative w-48 h-48 mx-auto md:mr-auto md:ml-0 mb-4 rounded-full border-4 border-blue-600 overflow-hidden bg-zinc-800">
                             {fighter2.image ? (
-                                <Image src={fighter2.image} alt={fighter2.name} fill className="object-cover" />
+                                <Image src={fighter2.image} alt={fighter2.name} fill sizes="192px" className="object-cover" />
                             ) : (
                                 <div className="w-full h-full bg-zinc-700 animate-pulse" />
                             )}

@@ -5,10 +5,21 @@ import Link from "next/link";
 import Image from "next/image";
 import { Menu, X, Ticket, Phone, MapPin, Handshake, ChevronDown, ImageIcon, Video } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSiteConfig } from "@/components/config-provider";
+
+// Format phone number for display: 59170000000 -> +591 700-00000
+function formatPhone(phone: string): string {
+    const digits = phone.replace(/\D/g, '');
+    if (digits.length === 11 && digits.startsWith('591')) {
+        return `+591 ${digits.slice(3, 6)}-${digits.slice(6)}`;
+    }
+    return phone;
+}
 
 const navItems = [
     { name: "Eventos", href: "/eventos" },
     { name: "Luchadores", href: "/luchadores" },
+    { name: "Campeonatos", href: "/campeonatos" },
     { name: "Ranking", href: "/ranking" },
     { name: "Tienda", href: "/tienda" },
     { name: "Academia", href: "/academia" },
@@ -17,13 +28,15 @@ const navItems = [
 ];
 
 const multimediaItems = [
-    { name: "Videos", href: "/#multimedia", icon: Video, desc: "Luchas y entrevistas" },
+    { name: "Videos", href: "/videos", icon: Video, desc: "Luchas y entrevistas" },
     { name: "Galería", href: "/galeria", icon: ImageIcon, desc: "Fotos de eventos" },
 ];
 
 export function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
     const [multimediaOpen, setMultimediaOpen] = useState(false);
+    const config = useSiteConfig();
+    const phoneDisplay = formatPhone(config.whatsappVentas);
 
     return (
         <nav className="fixed w-full z-50">
@@ -35,9 +48,9 @@ export function Navbar() {
 
                         {/* Left: Contact Info */}
                         <div className="hidden lg:flex items-center gap-4 text-gray-400 text-[11px]">
-                            <a href="tel:+59170000000" className="flex items-center gap-1.5 hover:text-white transition-colors">
+                            <a href={`tel:+${config.whatsappVentas}`} className="flex items-center gap-1.5 hover:text-white transition-colors">
                                 <Phone className="w-3 h-3" />
-                                <span>+591 700-00000</span>
+                                <span>{phoneDisplay}</span>
                             </a>
                             <span className="text-zinc-700">|</span>
                             <div className="flex items-center gap-1.5">
@@ -79,6 +92,7 @@ export function Navbar() {
                                     src="/images/logos/LNL-Logotipo.png"
                                     alt="LNL Logo"
                                     fill
+                                    sizes="80px"
                                     className="object-contain"
                                     priority
                                 />

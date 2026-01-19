@@ -1,40 +1,41 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { WrestlerCard } from "@/components/wrestler-card";
 import { cn } from "@/lib/utils";
-
-// Roster completo de la Liga Nacional de Lucha
-const roster = [
-    // Luchadores con fotos reales
-    { name: "Alberto Del Rio", nickname: "El Patrón", alignment: "heel", image: "/images/roster/sin-fondo/ALBERTO DEL RIO.png" },
-    { name: "Ajayu", nickname: "El Espíritu Andino", alignment: "face", image: "/images/roster/sin-fondo/AJAYU.png" },
-    { name: "Alexander Ruiz", nickname: "El Técnico", alignment: "face", image: "/images/roster/sin-fondo/ALEXANDER RUIZ.png" },
-    { name: "Amaru", nickname: "La Serpiente", alignment: "heel", image: "/images/roster/sin-fondo/AMARU.png" },
-    { name: "Américo", nickname: "El Corazón de Bolivia", alignment: "face", image: "/images/roster/sin-fondo/AMERICO.png" },
-    { name: "Axatuq", nickname: "El Guerrero", alignment: "face", image: "/images/roster/sin-fondo/AXATUQ.png" },
-    { name: "Coyote", nickname: "El Salvaje", alignment: "heel", image: "/images/roster/sin-fondo/coyote.png" },
-    { name: "Elking Gemio", nickname: "El Rey del Ring", alignment: "heel", image: "/images/roster/sin-fondo/ELKING GEMIO.png" },
-    { name: "Enigma", nickname: "El Misterioso", alignment: "heel", image: "/images/roster/sin-fondo/ENIGMA.png" },
-    { name: "Hijo de Dos Caras", nickname: "Legado de Leyenda", alignment: "face", image: "/images/roster/sin-fondo/HIJO DE DOS CARAS.png" },
-    { name: "Ignacio Laurent", nickname: "El Elegante", alignment: "heel", image: "/images/roster/sin-fondo/IGNACIO LAURENT.png" },
-    { name: "Jhos Godley", nickname: "La Estrella", alignment: "face", image: "/images/roster/sin-fondo/JHOS GODLEY.png" },
-    { name: "Kusi Ligerin", nickname: "El Ágil", alignment: "face", image: "/images/roster/sin-fondo/KUSI LIGERIN.png" },
-    { name: "Matty Camargo", nickname: "El Imparable", alignment: "heel", image: "/images/roster/sin-fondo/MATTY CAMARGO.png" },
-    { name: "Mr. Alesso", nickname: "El Showman", alignment: "face", image: "/images/roster/sin-fondo/MR ALESSO.png" },
-    { name: "Paul Villa", nickname: "El Gladiador", alignment: "face", image: "/images/roster/sin-fondo/PAUL VILLA.png" },
-    { name: "Profe Guerras", nickname: "El Maestro", alignment: "heel", image: "/images/roster/sin-fondo/PROFE GUERRAS.png" },
-    { name: "Rey Soberano", nickname: "El Monarca", alignment: "heel", image: "/images/roster/sin-fondo/REY SOBERANO.png" },
-    { name: "Sarah", nickname: "La Diva del Ring", alignment: "face", image: "/images/roster/sin-fondo/SARAH.png" },
-    { name: "Andrés Rojas", nickname: "El Luchador", alignment: "face", image: "/images/roster/sin-fondo/andres rojas 2.jpg" },
-] as const;
+import { collection, onSnapshot, query, orderBy, DocumentData } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 type FilterType = "all" | "face" | "heel";
 
-export default function RosterPage() {
-    const [filter, setFilter] = useState<FilterType>("all");
+interface Wrestler extends DocumentData {
+    id: string;
+    name: string;
+    nickname?: string;
+    alignment?: string;
+    image?: string;
+    slug?: string;
+}
 
-    const filteredRoster = roster.filter(wrestler => {
+export default function RosterPage() {
+    const [wrestlers, setWrestlers] = useState<Wrestler[]>([]);
+    const [filter, setFilter] = useState<FilterType>("all");
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const q = query(collection(db, "luchadores"), orderBy("name"));
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const data = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            })) as Wrestler[];
+            setWrestlers(data);
+            setLoading(false);
+        });
+        return () => unsubscribe();
+    }, []);
+
+    const filteredRoster = wrestlers.filter(wrestler => {
         if (filter === "all") return true;
         return wrestler.alignment === filter;
     });
@@ -58,15 +59,22 @@ export default function RosterPage() {
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 min-h-[400px]">
-                {filteredRoster.map((wrestler) => (
-                    <WrestlerCard
-                        key={wrestler.name}
-                        name={wrestler.name}
-                        nickname={wrestler.nickname}
-                        alignment={wrestler.alignment}
-                        imageUrl={wrestler.image}
-                    />
-                ))}
+                {loading ? (
+                    <div className="col-span-full text-center text-gray-500 py-20">Cargando luchadores...</div>
+                ) : filteredRoster.length > 0 ? (
+                    filteredRoster.map((wrestler) => (
+                        <WrestlerCard
+                            key={wrestler.id}
+                            name={wrestler.name}
+                            nickname={wrestler.nickname}
+                            alignment={wrestler.alignment as "face" | "heel" | undefined}
+                            imageUrl={wrestler.image}
+                            slug={wrestler.slug}
+                        />
+                    ))
+                ) : (
+                    <div className="col-span-full text-center text-gray-500 py-20">No se encontraron luchadores.</div>
+                )}
             </div>
         </div>
     );

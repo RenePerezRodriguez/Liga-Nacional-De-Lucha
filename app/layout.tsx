@@ -1,10 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
-import { SponsorsSection } from "@/components/sponsors";
-import { SocialFab } from "@/components/social-fab";
+import { LayoutWrapper } from "@/components/layout-wrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,6 +12,12 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+
+export const viewport: Viewport = {
+  themeColor: "#DC2626",
+  width: "device-width",
+  initialScale: 1,
+};
 
 export const metadata: Metadata = {
   title: {
@@ -38,9 +41,14 @@ export const metadata: Metadata = {
     title: "Liga Nacional de Lucha | Bolivia",
     description: "El sitio oficial de la Liga Nacional de Lucha de Bolivia.",
   },
-  manifest: "/manifest.json",
-  themeColor: "#DC2626",
-  viewport: "width=device-width, initial-scale=1",
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+    apple: [
+      { url: '/icons/web-app-manifest-192x192.png', sizes: '192x192', type: 'image/png' },
+    ],
+  },
 };
 
 export default function RootLayout({
@@ -53,13 +61,28 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white min-h-screen flex flex-col`}
       >
-        <Navbar />
-        <main className="flex-grow pt-28">
+        <LayoutWrapper>
           {children}
-        </main>
-        <SponsorsSection />
-        <Footer />
-        <SocialFab />
+        </LayoutWrapper>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "SportsOrganization",
+              "name": "Liga Nacional de Lucha",
+              "alternateName": "LNL Bolivia",
+              "url": "https://luchalibrebolivia.com",
+              "logo": "https://luchalibrebolivia.com/logo.png",
+              "sameAs": [
+                "https://facebook.com/lnlbolivia",
+                "https://instagram.com/lnlbolivia",
+                "https://tiktok.com/@lnlbolivia"
+              ],
+              "description": "La empresa de lucha libre profesional más importante de Bolivia."
+            })
+          }}
+        />
       </body>
     </html>
   );
