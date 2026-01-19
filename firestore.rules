@@ -1,0 +1,31 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function: Just check if user is logged in
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // 1. Global Setup (Auth required)
+    match /configuracion/{document=**} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // 2. Content Collections (Auth required)
+    match /luchadores/{document=**} { allow read: if true; allow write: if isAuthenticated(); }
+    match /eventos/{document=**} { allow read: if true; allow write: if isAuthenticated(); }
+    match /noticias/{document=**} { allow read: if true; allow write: if isAuthenticated(); }
+    match /campeonatos/{document=**} { allow read: if true; allow write: if isAuthenticated(); }
+    match /galeria_items/{document=**} { allow read: if true; allow write: if isAuthenticated(); }
+    match /productos/{document=**} { allow read: if true; allow write: if isAuthenticated(); }
+
+    // 3. Safety net
+    match /{document=**} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+  }
+}
