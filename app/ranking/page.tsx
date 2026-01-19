@@ -19,8 +19,7 @@ interface WrestlerRanking extends DocumentData {
     rankingReason?: string;
 }
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+
 
 export default function RankingPage() {
     const [wrestlers, setWrestlers] = useState<WrestlerRanking[]>([]);
