@@ -96,6 +96,12 @@ export function EventForm({ id }: EventFormProps) {
     const [wrestlers, setWrestlers] = useState<Wrestler[]>([]);
     const [championships, setChampionships] = useState<Championship[]>([]);
 
+    const [ringsidePrices, setRingsidePrices] = useState({
+        north: { alias: "Lado Norte", rowA: 100, rowB: 80, rowC: 60 },
+        south: { alias: "Lado Sur", rowA: 100, rowB: 80, rowC: 60 },
+        west: { alias: "Lado Oeste", rowA: 100, rowB: 80, rowC: 60 },
+    });
+
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string>("");
     const [currentImageUrl, setCurrentImageUrl] = useState("");
@@ -149,6 +155,7 @@ export function EventForm({ id }: EventFormProps) {
                     });
                     if (data.prices) setPrices(data.prices);
                     if (data.matches) setMatches(data.matches);
+                    if (data.ringsidePrices) setRingsidePrices(data.ringsidePrices);
                     if (data.image) {
                         setCurrentImageUrl(data.image);
                         setImagePreview(data.image);
@@ -294,6 +301,7 @@ export function EventForm({ id }: EventFormProps) {
                 isoDate: eventIsoDate,
                 prices,
                 matches,
+                ringsidePrices,
                 image: imageUrl,
                 updatedAt: new Date().toISOString()
             };
@@ -706,51 +714,15 @@ export function EventForm({ id }: EventFormProps) {
 
                     {/* Tickets */}
                     <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 md:p-8 space-y-6">
-                        <div className="pb-4 border-b border-zinc-800 mb-4 flex justify-between items-center">
+                        <div className="pb-4 border-b border-zinc-800 mb-4">
                             <h3 className="text-xl font-bold text-white flex items-center gap-2">
                                 <span className="w-2 h-8 bg-green-500 rounded block"></span>
-                                Entradas y Precios
+                                Ventas y Contacto
                             </h3>
-                            <button
-                                type="button"
-                                onClick={addPriceTier}
-                                className="text-xs font-bold uppercase bg-zinc-800 text-white px-3 py-1 rounded hover:bg-zinc-700 flex items-center gap-1"
-                            >
-                                <Plus className="w-3 h-3" /> Agregar Sector
-                            </button>
                         </div>
 
-                        <div className="space-y-3">
-                            {prices.map((tier, index) => (
-                                <div key={index} className="flex gap-4 items-center animate-fadeIn">
-                                    <input
-                                        type="text"
-                                        value={tier.name}
-                                        onChange={(e) => handlePriceChange(index, "name", e.target.value)}
-                                        placeholder="Sector (Ej: VIP)"
-                                        className="flex-1 bg-black border border-zinc-700 rounded-lg p-3 text-white"
-                                    />
-                                    <div className="relative w-32">
-                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">Bs.</span>
-                                        <input
-                                            type="number"
-                                            value={tier.price}
-                                            onChange={(e) => handlePriceChange(index, "price", e.target.value)}
-                                            className="w-full bg-black border border-zinc-700 rounded-lg p-3 pl-8 text-white font-mono"
-                                        />
-                                    </div>
-                                    <button
-                                        type="button"
-                                        onClick={() => removePriceTier(index)}
-                                        className="p-3 bg-red-900/20 text-red-500 rounded-lg hover:bg-red-900/50"
-                                    >
-                                        <Trash className="w-5 h-5" />
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-
-                        <div className="mt-6 pt-6 border-t border-zinc-800">
+                        {/* WhatsApp */}
+                        <div>
                             <label className="text-xs font-bold uppercase text-gray-400 block mb-1">WhatsApp de Ventas</label>
                             <div className="flex bg-black border border-zinc-700 rounded-lg overflow-hidden">
                                 <div className="bg-green-900/30 px-3 flex items-center justify-center border-r border-zinc-700">
@@ -765,6 +737,129 @@ export function EventForm({ id }: EventFormProps) {
                                 />
                             </div>
                             <p className="text-xs text-gray-500 mt-2">Enlace directo a WhatsApp para que los clientes consulten o compren.</p>
+                        </div>
+
+                        {/* Ringside Config */}
+                        <div className="mt-6 pt-6 border-t border-zinc-800">
+                            <h4 className="text-sm font-bold text-white uppercase tracking-wide mb-4">
+                                Configuracion Ringside
+                            </h4>
+                            <p className="text-xs text-gray-500 mb-4">Define el nombre y precio de cada fila para cada lado.</p>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                {/* Norte */}
+                                <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-4 space-y-3">
+                                    <div>
+                                        <label className="block text-lnl-red font-bold text-xs uppercase mb-1">Nombre</label>
+                                        <input
+                                            type="text"
+                                            value={ringsidePrices.north.alias}
+                                            onChange={(e) => setRingsidePrices(p => ({ ...p, north: { ...p.north, alias: e.target.value } }))}
+                                            className="w-full bg-black border border-zinc-700 rounded px-3 py-2 text-white text-sm"
+                                            placeholder="Lado Norte"
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        <div>
+                                            <label className="block text-gray-500 text-[10px] uppercase mb-1">Fila A</label>
+                                            <input type="number" value={ringsidePrices.north.rowA}
+                                                onChange={(e) => setRingsidePrices(p => ({ ...p, north: { ...p.north, rowA: parseInt(e.target.value) || 0 } }))}
+                                                className="w-full bg-black border border-zinc-700 rounded px-2 py-1.5 text-white text-sm text-center" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-gray-500 text-[10px] uppercase mb-1">Fila B</label>
+                                            <input type="number" value={ringsidePrices.north.rowB}
+                                                onChange={(e) => setRingsidePrices(p => ({ ...p, north: { ...p.north, rowB: parseInt(e.target.value) || 0 } }))}
+                                                className="w-full bg-black border border-zinc-700 rounded px-2 py-1.5 text-white text-sm text-center" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-gray-500 text-[10px] uppercase mb-1">Fila C</label>
+                                            <input type="number" value={ringsidePrices.north.rowC}
+                                                onChange={(e) => setRingsidePrices(p => ({ ...p, north: { ...p.north, rowC: parseInt(e.target.value) || 0 } }))}
+                                                className="w-full bg-black border border-zinc-700 rounded px-2 py-1.5 text-white text-sm text-center" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Sur */}
+                                <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-4 space-y-3">
+                                    <div>
+                                        <label className="block text-green-500 font-bold text-xs uppercase mb-1">Nombre</label>
+                                        <input
+                                            type="text"
+                                            value={ringsidePrices.south.alias}
+                                            onChange={(e) => setRingsidePrices(p => ({ ...p, south: { ...p.south, alias: e.target.value } }))}
+                                            className="w-full bg-black border border-zinc-700 rounded px-3 py-2 text-white text-sm"
+                                            placeholder="Lado Sur"
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        <div>
+                                            <label className="block text-gray-500 text-[10px] uppercase mb-1">Fila A</label>
+                                            <input type="number" value={ringsidePrices.south.rowA}
+                                                onChange={(e) => setRingsidePrices(p => ({ ...p, south: { ...p.south, rowA: parseInt(e.target.value) || 0 } }))}
+                                                className="w-full bg-black border border-zinc-700 rounded px-2 py-1.5 text-white text-sm text-center" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-gray-500 text-[10px] uppercase mb-1">Fila B</label>
+                                            <input type="number" value={ringsidePrices.south.rowB}
+                                                onChange={(e) => setRingsidePrices(p => ({ ...p, south: { ...p.south, rowB: parseInt(e.target.value) || 0 } }))}
+                                                className="w-full bg-black border border-zinc-700 rounded px-2 py-1.5 text-white text-sm text-center" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-gray-500 text-[10px] uppercase mb-1">Fila C</label>
+                                            <input type="number" value={ringsidePrices.south.rowC}
+                                                onChange={(e) => setRingsidePrices(p => ({ ...p, south: { ...p.south, rowC: parseInt(e.target.value) || 0 } }))}
+                                                className="w-full bg-black border border-zinc-700 rounded px-2 py-1.5 text-white text-sm text-center" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Oeste */}
+                                <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-4 space-y-3">
+                                    <div>
+                                        <label className="block text-blue-500 font-bold text-xs uppercase mb-1">Nombre</label>
+                                        <input
+                                            type="text"
+                                            value={ringsidePrices.west.alias}
+                                            onChange={(e) => setRingsidePrices(p => ({ ...p, west: { ...p.west, alias: e.target.value } }))}
+                                            className="w-full bg-black border border-zinc-700 rounded px-3 py-2 text-white text-sm"
+                                            placeholder="Lado Oeste"
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        <div>
+                                            <label className="block text-gray-500 text-[10px] uppercase mb-1">Fila A</label>
+                                            <input type="number" value={ringsidePrices.west.rowA}
+                                                onChange={(e) => setRingsidePrices(p => ({ ...p, west: { ...p.west, rowA: parseInt(e.target.value) || 0 } }))}
+                                                className="w-full bg-black border border-zinc-700 rounded px-2 py-1.5 text-white text-sm text-center" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-gray-500 text-[10px] uppercase mb-1">Fila B</label>
+                                            <input type="number" value={ringsidePrices.west.rowB}
+                                                onChange={(e) => setRingsidePrices(p => ({ ...p, west: { ...p.west, rowB: parseInt(e.target.value) || 0 } }))}
+                                                className="w-full bg-black border border-zinc-700 rounded px-2 py-1.5 text-white text-sm text-center" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-gray-500 text-[10px] uppercase mb-1">Fila C</label>
+                                            <input type="number" value={ringsidePrices.west.rowC}
+                                                onChange={(e) => setRingsidePrices(p => ({ ...p, west: { ...p.west, rowC: parseInt(e.target.value) || 0 } }))}
+                                                className="w-full bg-black border border-zinc-700 rounded px-2 py-1.5 text-white text-sm text-center" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {id && (
+                                <div className="mt-4 text-center">
+                                    <Link
+                                        href={`/admin/eventos/${id}/seats`}
+                                        className="text-xs text-gray-500 hover:text-lnl-gold underline"
+                                    >
+                                        Gestionar asientos vendidos/reservados
+                                    </Link>
+                                </div>
+                            )}
                         </div>
                     </section>
                 </div>

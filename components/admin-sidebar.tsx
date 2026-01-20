@@ -21,7 +21,8 @@ import {
     Film,
     Store,
     ChevronDown,
-    HelpCircle
+    HelpCircle,
+    Ticket
 } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
@@ -64,6 +65,7 @@ const menuCategories = [
         items: [
             { name: "Tienda", href: "/admin/tienda", icon: ShoppingBag, roles: ["admin", "editor"] },
             { name: "Sponsors", href: "/admin/auspiciadores", icon: Handshake, roles: ["admin", "editor"] },
+            { name: "Ringside", href: "/admin/ringside", icon: Ticket, roles: ["admin", "editor"] },
         ]
     },
     {

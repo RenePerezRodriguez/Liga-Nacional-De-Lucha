@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { doc, getDoc, addDoc, updateDoc, collection, getDocs } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "@/lib/firebase";
-import { Loader2, Save, Upload, X, ArrowLeft, Music, Video, Plus, Trophy, Trash2, Zap } from "lucide-react";
+import { Loader2, Save, Upload, X, ArrowLeft, Music, Video, Plus, Trophy, Trash2, Zap, Globe, Facebook, Youtube, Twitch } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { clsx } from "clsx";
@@ -28,6 +28,19 @@ interface Championship {
     title: string;
     image?: string;
 }
+
+interface SocialLink {
+    platform: string;
+    url: string;
+}
+
+const SOCIAL_PLATFORMS = [
+    { id: "facebook", name: "Facebook", icon: Facebook },
+    { id: "youtube", name: "YouTube", icon: Youtube },
+    { id: "twitch", name: "Twitch", icon: Twitch },
+    { id: "twitter", name: "X / Twitter", icon: Globe }, // Lucide doesn't have X, using Globe as fallback or just text
+    { id: "website", name: "Sitio Web", icon: Globe },
+];
 
 export function WrestlerForm({ id }: WrestlerFormProps) {
     const router = useRouter();
@@ -53,7 +66,8 @@ export function WrestlerForm({ id }: WrestlerFormProps) {
         },
         socials: {
             instagram: "",
-            twitter: ""
+            tiktok: "", // Replacing Twitter as primary
+            others: [] as SocialLink[]
         },
         championships: [] as string[], // Array of Championship IDs
         // Ranking fields
@@ -72,7 +86,20 @@ export function WrestlerForm({ id }: WrestlerFormProps) {
             if (savedData) {
                 try {
                     const parsed = JSON.parse(savedData);
-                    setFormData(prev => ({ ...prev, ...parsed }));
+                    setFormData(prev => ({
+                        ...prev,
+                        ...parsed,
+                        socials: {
+                            ...prev.socials,
+                            ...(parsed.socials || {}),
+                            others: Array.isArray(parsed.socials?.others) ? parsed.socials.others : []
+                        },
+                        stats: {
+                            ...prev.stats,
+                            ...(parsed.stats || {}),
+                            signatures: Array.isArray(parsed.stats?.signatures) ? parsed.stats.signatures : []
+                        }
+                    }));
                     console.log("Restored backup from localStorage");
                 } catch (e) {
                     console.error("Failed to parse backup", e);
@@ -131,7 +158,8 @@ export function WrestlerForm({ id }: WrestlerFormProps) {
                             },
                             socials: {
                                 instagram: data.socials?.instagram || "",
-                                twitter: data.socials?.twitter || ""
+                                tiktok: data.socials?.tiktok || "",
+                                others: data.socials?.others || []
                             },
                             championships: data.championships || [],
                             // Ranking fields
@@ -190,6 +218,35 @@ export function WrestlerForm({ id }: WrestlerFormProps) {
         setFormData({
             ...formData,
             stats: { ...formData.stats, signatures: newSignatures }
+        });
+    };
+
+    // Socials Helpers
+    const addSocialLink = () => {
+        setFormData({
+            ...formData,
+            socials: {
+                ...formData.socials,
+                others: [...formData.socials.others, { platform: "facebook", url: "" }]
+            }
+        });
+    };
+
+    const removeSocialLink = (index: number) => {
+        const newOthers = [...formData.socials.others];
+        newOthers.splice(index, 1);
+        setFormData({
+            ...formData,
+            socials: { ...formData.socials, others: newOthers }
+        });
+    };
+
+    const updateSocialLink = (index: number, field: keyof SocialLink, value: string) => {
+        const newOthers = [...formData.socials.others];
+        newOthers[index] = { ...newOthers[index], [field]: value };
+        setFormData({
+            ...formData,
+            socials: { ...formData.socials, others: newOthers }
         });
     };
 
@@ -310,12 +367,6 @@ export function WrestlerForm({ id }: WrestlerFormProps) {
             </div>
 
             <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-                {/* Left Column: Image & Media (swapped for 3-col layout, put image on right or left? Task asked for standard layout: Left Content, Right Media. Let's stick to Layout: 2/3 Content, 1/3 Media) */}
-                {/* Wait, standard layout is: 2/3 Content (Left), 1/3 Media/Actions (Right). 
-                    The previous refactor of Product/Gallery used 2/3 Left = Content, 1/3 Right = Image. 
-                    I will follow that consistency.
-                */}
 
                 {/* CENTER/LEFT: Content Columns */}
                 <div className="lg:col-span-2 space-y-6">
@@ -536,7 +587,7 @@ export function WrestlerForm({ id }: WrestlerFormProps) {
                         {/* Redes Sociales */}
                         <div className="pt-4 border-t border-zinc-800">
                             <h4 className="text-xs font-bold text-gray-500 uppercase mb-3">Redes Sociales</h4>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                 <div>
                                     <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
                                         📸 Instagram
@@ -554,18 +605,61 @@ export function WrestlerForm({ id }: WrestlerFormProps) {
                                 </div>
                                 <div>
                                     <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
-                                        🐦 Twitter / X
+                                        🎵 TikTok
                                     </label>
                                     <input
                                         type="text"
-                                        placeholder="@usuario (sin https://)"
-                                        value={formData.socials.twitter}
+                                        placeholder="@usuario"
+                                        value={formData.socials.tiktok}
                                         onChange={e => setFormData({
                                             ...formData,
-                                            socials: { ...formData.socials, twitter: e.target.value }
+                                            socials: { ...formData.socials, tiktok: e.target.value }
                                         })}
                                         className="w-full bg-black border border-zinc-700 rounded-lg p-2 text-white focus:border-lnl-gold focus:outline-none text-xs"
                                     />
+                                </div>
+                            </div>
+
+                            {/* Additional Socials */}
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-2">
+                                    Otras Redes
+                                </label>
+                                <div className="space-y-2">
+                                    {formData.socials.others?.map((social, index) => (
+                                        <div key={index} className="flex gap-2">
+                                            <select
+                                                value={social.platform}
+                                                onChange={(e) => updateSocialLink(index, "platform", e.target.value)}
+                                                className="bg-black border border-zinc-700 rounded-lg p-2 text-white text-xs focus:ring-1 focus:ring-lnl-gold"
+                                            >
+                                                {SOCIAL_PLATFORMS.map(p => (
+                                                    <option key={p.id} value={p.id}>{p.name}</option>
+                                                ))}
+                                            </select>
+                                            <input
+                                                type="text"
+                                                value={social.url}
+                                                onChange={(e) => updateSocialLink(index, "url", e.target.value)}
+                                                placeholder="https://..."
+                                                className="flex-1 bg-black border border-zinc-700 rounded-lg p-2 text-white text-xs focus:ring-1 focus:ring-lnl-gold"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => removeSocialLink(index)}
+                                                className="p-2 bg-zinc-800 text-red-500 rounded-lg hover:bg-zinc-700"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                    <button
+                                        type="button"
+                                        onClick={addSocialLink}
+                                        className="text-xs text-lnl-gold hover:text-yellow-400 font-bold flex items-center gap-1"
+                                    >
+                                        <Plus className="w-3 h-3" /> Agregar Red Social
+                                    </button>
                                 </div>
                             </div>
                         </div>

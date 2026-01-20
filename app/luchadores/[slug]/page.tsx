@@ -1,4 +1,4 @@
-import { ArrowLeft, Trophy, MapPin, Ruler, Weight, Zap, Music, Video, Instagram, Twitter, TrendingUp, TrendingDown, Swords, Calendar, BarChart3, Target, Award } from "lucide-react";
+import { ArrowLeft, Trophy, MapPin, Ruler, Weight, Zap, Music, Video, Instagram, Twitter, TrendingUp, TrendingDown, Swords, Calendar, BarChart3, Target, Award, Facebook, Youtube, Twitch, Globe, Link as LinkIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { collection, getDocs, query, where, orderBy, limit, DocumentData, doc, getDoc } from "firebase/firestore";
@@ -26,6 +26,8 @@ interface Wrestler extends DocumentData {
     socials?: {
         instagram?: string;
         twitter?: string;
+        tiktok?: string;
+        others?: { platform: string; url: string }[];
     };
     entranceTheme?: string;
     videoHighlight?: string;
@@ -50,6 +52,27 @@ interface MatchRecord {
     championshipName?: string;
     isMainEvent: boolean;
 }
+
+const getSocialIcon = (platform: string) => {
+    switch (platform) {
+        case "facebook": return Facebook;
+        case "youtube": return Youtube;
+        case "twitch": return Twitch;
+        case "twitter": return Twitter;
+        case "website": return Globe;
+        default: return LinkIcon;
+    }
+};
+
+const getSocialColor = (platform: string) => {
+    switch (platform) {
+        case "facebook": return "bg-blue-600";
+        case "youtube": return "bg-red-600";
+        case "twitch": return "bg-purple-600";
+        case "twitter": return "bg-sky-500";
+        default: return "bg-zinc-700";
+    }
+};
 
 async function getWrestlerBySlug(slug: string): Promise<Wrestler | null> {
     const wrestlersQuery = query(
@@ -235,16 +258,38 @@ export default async function WrestlerProfile({ params }: { params: Promise<{ sl
                                 {wrestler.rankingPoints || DEFAULT_ELO_RATING} pts • {rankingTier.name}
                             </span>
 
+                            {/* Instagram */}
                             {socials.instagram && (
-                                <a href={`https://instagram.com/${socials.instagram.replace('@', '')}`} target="_blank" rel="noreferrer" className="p-2 bg-gradient-to-br from-purple-600 to-pink-500 rounded-full hover:scale-110 transition-transform">
+                                <a href={`https://instagram.com/${socials.instagram.replace('@', '')}`} target="_blank" rel="noreferrer" className="p-2 bg-gradient-to-br from-purple-600 to-pink-500 rounded-full hover:scale-110 transition-transform" aria-label="Instagram">
                                     <Instagram className="w-4 h-4 text-white" />
                                 </a>
                             )}
+
+                            {/* TikTok (Main Replacement) */}
+                            {socials.tiktok && (
+                                <a href={`https://tiktok.com/@${socials.tiktok.replace('@', '')}`} target="_blank" rel="noreferrer" className="p-2 bg-black border border-zinc-700 rounded-full hover:scale-110 transition-transform hover:border-cyan-400 group" aria-label="TikTok">
+                                    {/* Using Music icon as TikTok proxy or just Video. Let's use Music for 'Make Your Day' vibe */}
+                                    <Music className="w-4 h-4 text-white group-hover:text-cyan-400" />
+                                </a>
+                            )}
+
+                            {/* Twitter (Legacy) */}
                             {socials.twitter && (
-                                <a href={`https://twitter.com/${socials.twitter.replace('@', '')}`} target="_blank" rel="noreferrer" className="p-2 bg-sky-500 rounded-full hover:scale-110 transition-transform">
+                                <a href={`https://twitter.com/${socials.twitter.replace('@', '')}`} target="_blank" rel="noreferrer" className="p-2 bg-sky-500 rounded-full hover:scale-110 transition-transform" aria-label="Twitter">
                                     <Twitter className="w-4 h-4 text-white" />
                                 </a>
                             )}
+
+                            {/* Other Socials */}
+                            {socials.others && socials.others.map((social, idx) => {
+                                const Icon = getSocialIcon(social.platform);
+                                const colorClass = getSocialColor(social.platform);
+                                return (
+                                    <a key={idx} href={social.url} target="_blank" rel="noreferrer" className={`p-2 ${colorClass} rounded-full hover:scale-110 transition-transform`} aria-label={social.platform}>
+                                        <Icon className="w-4 h-4 text-white" />
+                                    </a>
+                                );
+                            })}
                         </div>
                     </div>
                 </div>

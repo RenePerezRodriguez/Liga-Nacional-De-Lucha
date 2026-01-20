@@ -4,6 +4,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 interface EventCardProps {
+    id: string;
     title: string;
     date: string;
     time: string;
@@ -13,6 +14,7 @@ interface EventCardProps {
 }
 
 export function EventCard({
+    id,
     title,
     date,
     time,
@@ -21,8 +23,8 @@ export function EventCard({
     isFeatured = false,
 }: EventCardProps) {
     return (
-        <div className={cn(
-            "group relative overflow-hidden rounded-xl bg-lnl-gray border border-zinc-800 transition-all hover:border-lnl-red hover:shadow-[0_0_20px_rgba(220,38,38,0.3)]",
+        <Link href={`/eventos/${id}`} className={cn(
+            "group relative overflow-hidden rounded-xl bg-lnl-gray border border-zinc-800 transition-all hover:border-lnl-red hover:shadow-[0_0_20px_rgba(220,38,38,0.3)] block",
             isFeatured ? "md:col-span-2 aspect-video" : "aspect-[4/5]"
         )}>
             {/* Background Image Placeholder */}
@@ -66,12 +68,11 @@ export function EventCard({
                     </div>
                 </div>
 
-                <Link
-                    href="/reservas"
-                    className="inline-flex items-center justify-center bg-lnl-red text-white font-bold uppercase tracking-wider py-2 px-6 rounded hover:bg-red-700 transition-colors"
+                <span
+                    className="inline-flex items-center justify-center bg-lnl-red text-white font-bold uppercase tracking-wider py-2 px-6 rounded hover:bg-red-700 transition-colors pointer-events-none"
                 >
                     Entradas
-                </Link>
+                </span>
             </div>
 
             {/* Featured Tag */}
@@ -80,6 +81,6 @@ export function EventCard({
                     Evento Principal
                 </div>
             )}
-        </div>
+        </Link>
     );
 }

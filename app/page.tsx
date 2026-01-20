@@ -225,6 +225,7 @@ export default async function Home() {
             upcomingEvents.map(event => (
               <EventCard
                 key={event.id}
+                id={event.id}
                 title={event.title}
                 date={event.date}
                 time={event.time}

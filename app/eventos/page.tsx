@@ -142,6 +142,7 @@ export default async function EventsPage() {
                         {events.map((event) => (
                             <EventCard
                                 key={event.id}
+                                id={event.id}
                                 title={event.title}
                                 date={event.date}
                                 time={event.time}
