@@ -26,7 +26,7 @@ const SEATS_PER_ROW = 12;
 
 export function RingsideMap({ seats, mode, onSeatClick, selectedSeats = [] }: RingsideMapProps) {
 
-    const renderSeat = (sideKey: string, row: string, seatNum: number) => {
+    const renderSeat = (sideKey: string, row: string, seatNum: number, isVertical = false) => {
         const id = `${sideKey}-${row}-${seatNum}`;
         const status = seats[id] || "available";
         const isSelected = selectedSeats.includes(id);
@@ -62,9 +62,13 @@ export function RingsideMap({ seats, mode, onSeatClick, selectedSeats = [] }: Ri
                 type="button"
                 disabled={disabled}
                 onClick={() => onSeatClick?.(id, status)}
-                title={`Lado ${sideKey === "N" ? "Norte" : sideKey === "S" ? "Sur" : "Oeste"} - Fila ${row} - Asiento ${seatNum}`}
+                title={`${sideKey === "N" ? "Norte" : sideKey === "S" ? "Sur" : "Oeste"} - Fila ${row} - Asiento ${seatNum}`}
                 className={cn(
-                    "w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 rounded border flex items-center justify-center text-[8px] sm:text-[9px] md:text-[10px] font-bold transition-all",
+                    "rounded border flex items-center justify-center font-bold transition-all",
+                    // Mobile: w-6 h-7 (easier touch) | Desktop: Scaled
+                    isVertical
+                        ? "w-8 h-6 sm:w-10 sm:h-7 md:w-12 md:h-8"
+                        : "w-6 h-7 text-[9px] sm:w-7 sm:h-10 sm:text-[10px] md:w-8 md:h-12 md:text-xs",
                     bgColor,
                     textColor,
                     cursor
@@ -75,111 +79,172 @@ export function RingsideMap({ seats, mode, onSeatClick, selectedSeats = [] }: Ri
         );
     };
 
-    const renderRowLabel = (row: string) => (
-        <span className="text-[10px] sm:text-xs font-black text-gray-500 w-4 sm:w-5 flex items-center justify-center">
-            {row}
-        </span>
-    );
-
     return (
-        <div className="bg-zinc-950 p-3 sm:p-4 md:p-6 rounded-xl">
-            <div className="flex flex-col items-center gap-4 sm:gap-6 md:gap-8">
+        <div className="bg-zinc-950 p-4 rounded-xl flex flex-col items-center justify-center">
 
-                {/* Mobile: Stack vertically, Desktop: Side by side */}
-                <div className="flex flex-col lg:flex-row items-center justify-center gap-4 lg:gap-8 w-full">
+            {/* =====================================================================================
+                MOBILE LAYOUT (< md) - VERTICAL STACK
+                Strategy: Stack everything vertically to avoid horizontal scroll.
+                Apps like Ticketmaster often use lists or stacked blocks for mobile.
+                Order: Norte -> Oeste (Rotated to Horizontal) -> Ring -> Sur
+               ===================================================================================== */}
+            <div className="flex md:hidden flex-col items-center gap-4 w-full">
 
-                    {/* LADO NORTE */}
-                    <div className="flex flex-col items-center gap-1">
-                        <span className="text-lnl-red font-black uppercase text-xs sm:text-sm tracking-widest mb-1">
-                            LADO NORTE
-                        </span>
-                        {[...ROWS].reverse().map(row => (
-                            <div key={row} className="flex items-center gap-0.5">
-                                {renderRowLabel(row)}
-                                {Array.from({ length: SEATS_PER_ROW }).map((_, i) =>
-                                    renderSeat("N", row, i + 1)
-                                )}
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* RING CENTRAL - Solo visible en desktop entre Norte y Sur */}
-                    <div className="hidden lg:flex relative w-32 h-32 xl:w-40 xl:h-40 flex-shrink-0 mx-4">
-                        <div className="absolute inset-0 bg-zinc-900 border-2 border-zinc-700 rounded flex items-center justify-center">
-                            <div className="absolute inset-2 border-2 border-red-600/60 rounded" />
-                            <div className="absolute inset-4 border-2 border-white/40 rounded" />
-                            <div className="absolute inset-6 border-2 border-blue-600/60 rounded" />
-                            <div className="absolute top-0 left-0 w-3 h-3 bg-white rounded-full border border-gray-400 -translate-x-1 -translate-y-1" />
-                            <div className="absolute top-0 right-0 w-3 h-3 bg-blue-600 rounded-full border border-blue-800 translate-x-1 -translate-y-1" />
-                            <div className="absolute bottom-0 left-0 w-3 h-3 bg-red-600 rounded-full border border-red-800 -translate-x-1 translate-y-1" />
-                            <div className="absolute bottom-0 right-0 w-3 h-3 bg-white rounded-full border border-gray-400 translate-x-1 translate-y-1" />
-                            <div className="relative w-16 h-16 xl:w-20 xl:h-20">
-                                <Image src="/images/logos/LNL-Logotipo.png" alt="LNL" fill className="object-contain opacity-80" />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* LADO SUR */}
-                    <div className="flex flex-col items-center gap-1">
-                        <span className="text-green-500 font-black uppercase text-xs sm:text-sm tracking-widest mb-1">
-                            LADO SUR
-                        </span>
-                        {ROWS.map(row => (
-                            <div key={row} className="flex items-center gap-0.5">
-                                {Array.from({ length: SEATS_PER_ROW }).map((_, i) =>
-                                    renderSeat("S", row, i + 1)
-                                )}
-                                {renderRowLabel(row)}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Ring visual for mobile - compact version */}
-                <div className="lg:hidden relative w-24 h-24 sm:w-28 sm:h-28 flex-shrink-0">
-                    <div className="absolute inset-0 bg-zinc-900 border-2 border-zinc-700 rounded flex items-center justify-center">
-                        <div className="absolute inset-1 border border-red-600/60 rounded" />
-                        <div className="absolute inset-3 border border-blue-600/60 rounded" />
-                        <div className="relative w-12 h-12 sm:w-14 sm:h-14">
-                            <Image src="/images/logos/LNL-Logotipo.png" alt="LNL" fill className="object-contain opacity-80" />
-                        </div>
-                    </div>
-                </div>
-
-                {/* LADO OESTE */}
-                <div className="flex flex-col items-center gap-1 mt-2">
-                    <span className="text-blue-500 font-black uppercase text-xs sm:text-sm tracking-widest mb-1">
-                        LADO OESTE
-                    </span>
-                    {ROWS.map(row => (
-                        <div key={row} className="flex items-center gap-0.5">
-                            {renderRowLabel(row)}
+                {/* 1. NORTE (Horizontal) */}
+                <div className="flex flex-col items-center w-full">
+                    <span className="text-lnl-red font-black uppercase text-xs tracking-widest mb-1">LADO NORTE</span>
+                    {[...ROWS].reverse().map(row => (
+                        <div key={row} className="flex gap-0.5 mb-0.5 items-center justify-center w-full">
+                            <span className="text-[9px] font-bold text-gray-500 w-3 text-right mr-0.5">{row}</span>
                             {Array.from({ length: SEATS_PER_ROW }).map((_, i) =>
-                                renderSeat("O", row, i + 1)
+                                renderSeat("N", row, i + 1)
                             )}
-                            {renderRowLabel(row)}
+                            <span className="text-[9px] font-bold text-gray-500 w-3 ml-0.5">{row}</span>
                         </div>
                     ))}
                 </div>
 
-                {/* Legend */}
-                <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mt-4 pt-4 border-t border-zinc-800 w-full">
-                    <div className="flex items-center gap-1.5">
-                        <div className="w-4 h-4 bg-zinc-800 border border-zinc-600 rounded" />
-                        <span className="text-[10px] sm:text-xs text-gray-400 font-bold uppercase">Disponible</span>
+                {/* 2. OESTE (Rotated to Horizontal for Mobile fit) */}
+                <div className="flex flex-col items-center w-full">
+                    {/* Visual Divider/Header for Section */}
+                    <span className="text-blue-500 font-black uppercase text-xs tracking-widest mb-1">LADO OESTE</span>
+                    {[...ROWS].reverse().map(row => (
+                        <div key={row} className="flex gap-0.5 mb-0.5 items-center justify-center w-full">
+                            <span className="text-[9px] font-bold text-gray-500 w-3 text-right mr-0.5">{row}</span>
+                            {Array.from({ length: SEATS_PER_ROW }).map((_, i) =>
+                                renderSeat("O", row, i + 1) // Render as Horizontal (default)
+                            )}
+                            <span className="text-[9px] font-bold text-gray-500 w-3 ml-0.5">{row}</span>
+                        </div>
+                    ))}
+                </div>
+
+                {/* 3. RING */}
+                <div className="relative w-[180px] h-[180px] flex-shrink-0 bg-zinc-900 border-2 border-zinc-700 rounded-lg flex items-center justify-center my-1">
+                    <div className="absolute inset-3 border-4 border-red-600/70 rounded" />
+                    <div className="absolute inset-6 border-4 border-white/50 rounded" />
+                    <div className="absolute inset-9 border-4 border-blue-600/70 rounded" />
+                    <div className="relative w-20 h-20 opacity-80">
+                        <Image src="/images/logos/LNL-Logotipo.png" alt="LNL" fill className="object-contain" />
                     </div>
-                    <div className="flex items-center gap-1.5">
-                        <div className="w-4 h-4 bg-lnl-gold border border-lnl-gold rounded" />
-                        <span className="text-[10px] sm:text-xs text-gray-400 font-bold uppercase">Seleccionado</span>
+                </div>
+
+                {/* 4. SUR (Horizontal) */}
+                <div className="flex flex-col items-center w-full">
+                    <span className="text-green-500 font-black uppercase text-xs tracking-widest mb-1">LADO SUR</span>
+                    {[...ROWS].map(row => (
+                        <div key={row} className="flex gap-0.5 mb-0.5 items-center justify-center w-full">
+                            <span className="text-[9px] font-bold text-gray-500 w-3 text-right mr-0.5">{row}</span>
+                            {Array.from({ length: SEATS_PER_ROW }).map((_, i) =>
+                                renderSeat("S", row, i + 1)
+                            )}
+                            <span className="text-[9px] font-bold text-gray-500 w-3 ml-0.5">{row}</span>
+                        </div>
+                    ))}
+                </div>
+
+            </div>
+
+
+            {/* =====================================================================================
+                DESKTOP LAYOUT (md+) - 3x3 GRID
+                Strategy: Mathematical centering with Ghost Column
+               ===================================================================================== */}
+            <div className="hidden md:grid grid-cols-[1fr_auto_1fr] gap-x-4 items-center w-full max-w-5xl mx-auto">
+
+                {/* ROW 1: NORTE */}
+                <div className="col-start-2 flex flex-col items-center justify-end pb-4">
+                    <span className="text-lnl-red font-black uppercase text-sm tracking-widest mb-2">LADO NORTE</span>
+                    {[...ROWS].reverse().map(row => (
+                        <div key={row} className="flex gap-1 mb-1 items-center">
+                            <span className="text-[10px] font-bold text-gray-500 w-4 text-right mr-1">{row}</span>
+                            {Array.from({ length: SEATS_PER_ROW }).map((_, i) =>
+                                renderSeat("N", row, i + 1)
+                            )}
+                            <span className="text-[10px] font-bold text-gray-500 w-4 ml-1">{row}</span>
+                        </div>
+                    ))}
+                </div>
+
+                {/* ROW 2: OESTE | RING | GHOST */}
+                <div className="col-start-1 flex items-center justify-end gap-2 h-full">
+                    <span className="text-blue-500 font-black uppercase text-sm tracking-widest whitespace-nowrap" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', textOrientation: 'sideways' }}>LADO OESTE</span>
+                    <div className="flex gap-1">
+                        {[...ROWS].reverse().map(row => (
+                            <div key={row} className="flex flex-col gap-1 items-center">
+                                <span className="text-[10px] font-bold text-gray-500 mb-1">{row}</span>
+                                {Array.from({ length: SEATS_PER_ROW }).map((_, i) =>
+                                    renderSeat("O", row, i + 1, true)
+                                )}
+                                <span className="text-[10px] font-bold text-gray-500 mt-1">{row}</span>
+                            </div>
+                        ))}
                     </div>
-                    <div className="flex items-center gap-1.5">
-                        <div className="w-4 h-4 bg-red-900/60 border border-red-700 rounded" />
-                        <span className="text-[10px] sm:text-xs text-gray-400 font-bold uppercase">Vendido</span>
+                </div>
+
+                <div className="col-start-2 flex items-center justify-center">
+                    <div className="relative w-[380px] h-[380px] flex-shrink-0 bg-zinc-900 border-2 border-zinc-700 rounded-lg flex items-center justify-center">
+                        <div className="absolute inset-4 border-4 border-red-600/70 rounded" />
+                        <div className="absolute inset-8 border-4 border-white/50 rounded" />
+                        <div className="absolute inset-12 border-4 border-blue-600/70 rounded" />
+                        <div className="absolute top-0 left-0 w-6 h-6 bg-white rounded-full border border-gray-400 -translate-x-2 -translate-y-2" />
+                        <div className="absolute top-0 right-0 w-6 h-6 bg-blue-600 rounded-full border border-blue-800 translate-x-2 -translate-y-2" />
+                        <div className="absolute bottom-0 left-0 w-6 h-6 bg-red-600 rounded-full border border-red-800 -translate-x-2 translate-y-2" />
+                        <div className="absolute bottom-0 right-0 w-6 h-6 bg-white rounded-full border border-gray-400 translate-x-2 translate-y-2" />
+                        <div className="relative w-32 h-32 opacity-80">
+                            <Image src="/images/logos/LNL-Logotipo.png" alt="LNL" fill className="object-contain" />
+                        </div>
                     </div>
-                    <div className="flex items-center gap-1.5">
-                        <div className="w-4 h-4 bg-yellow-900/60 border border-yellow-700 rounded" />
-                        <span className="text-[10px] sm:text-xs text-gray-400 font-bold uppercase">Reservado</span>
+                </div>
+
+                <div className="col-start-3 flex items-center justify-start gap-2 h-full opacity-0 pointer-events-none select-none">
+                    <div className="flex gap-1">
+                        {[...ROWS].reverse().map(row => (
+                            <div key={row} className="flex flex-col gap-1 items-center">
+                                <span className="text-[10px] font-bold text-gray-500 mb-1">{row}</span>
+                                {Array.from({ length: SEATS_PER_ROW }).map((_, i) =>
+                                    renderSeat("O", row, i + 1, true)
+                                )}
+                                <span className="text-[10px] font-bold text-gray-500 mt-1">{row}</span>
+                            </div>
+                        ))}
                     </div>
+                    <span className="text-blue-500 font-black uppercase text-sm tracking-widest whitespace-nowrap" style={{ writingMode: 'vertical-rl' }}>LADO ESTE</span>
+                </div>
+
+                {/* ROW 3: SUR */}
+                <div className="col-start-2 flex flex-col items-center justify-start pt-4">
+                    {[...ROWS].map(row => (
+                        <div key={row} className="flex gap-1 mb-1 items-center">
+                            <span className="text-[10px] font-bold text-gray-500 w-4 text-right mr-1">{row}</span>
+                            {Array.from({ length: SEATS_PER_ROW }).map((_, i) =>
+                                renderSeat("S", row, i + 1)
+                            )}
+                            <span className="text-[10px] font-bold text-gray-500 w-4 ml-1">{row}</span>
+                        </div>
+                    ))}
+                    <span className="text-green-500 font-black uppercase text-sm tracking-widest mt-2">LADO SUR</span>
+                </div>
+
+            </div>
+
+            {/* Legend */}
+            <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mt-6 sm:mt-8 pt-4 border-t border-zinc-800 w-full">
+                <div className="flex items-center gap-1.5">
+                    <div className="w-4 h-4 bg-zinc-800 border border-zinc-600 rounded" />
+                    <span className="text-[10px] sm:text-xs text-gray-400 font-bold uppercase">Disponible</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                    <div className="w-4 h-4 bg-lnl-gold border border-lnl-gold rounded" />
+                    <span className="text-[10px] sm:text-xs text-gray-400 font-bold uppercase">Seleccionado</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                    <div className="w-4 h-4 bg-red-900/60 border border-red-700 rounded" />
+                    <span className="text-[10px] sm:text-xs text-gray-400 font-bold uppercase">Vendido</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                    <div className="w-4 h-4 bg-yellow-900/60 border border-yellow-700 rounded" />
+                    <span className="text-[10px] sm:text-xs text-gray-400 font-bold uppercase">Reservado</span>
                 </div>
             </div>
         </div>
